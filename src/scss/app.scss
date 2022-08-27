@@ -1,0 +1,8 @@
+@import './normalize.scss';
+@import './script.scss';
+
+.app-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
