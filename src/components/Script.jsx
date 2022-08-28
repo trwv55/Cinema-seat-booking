@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Select from 'react-select';
 
 const options = [
@@ -21,7 +21,42 @@ const listSeats = [
 
 const Script = () => {
   const [selectedOption, setSelectedOption] = useState(null);
+  const [selectedDateOption, setSelectedDateOption] = useState(null);
   const [seats, setSeats] = useState(listSeats);
+  const [date, setDate] = useState([]);
+
+  //Делаем массив дат
+  function getDate() {
+    const dayBefore = new Date();
+    const today = new Date();
+    let pastDays = [];
+    let nextDays = [];
+
+    for (let i = 0; i <= 3; i++) {
+      dayBefore.setDate(dayBefore.getDate() - 1);
+      const dateOld = displayDate(dayBefore);
+      pastDays.push(dateOld);
+    }
+
+    for (let i = 0; i <= 3; i++) {
+      today.setDate(today.getDate() + 1);
+      const dateFuture = displayDate(today);
+      nextDays.push(dateFuture);
+    }
+    return pastDays.reverse().concat(nextDays);
+  }
+
+  //Приводим дату к нужному виду
+  function displayDate(date) {
+    const curDate = date.getDate();
+    const curMonth = date.getMonth() + 1;
+    const curYear = date.getFullYear();
+    const value = {
+      value: `${curDate}-0${curMonth}-${curYear}`,
+      label: `${curDate}-0${curMonth}-${curYear}`,
+    };
+    return value;
+  }
 
   const onClickPlace = (id) => {
     const selectedSeat = seats.map((seat) => {
@@ -30,11 +65,16 @@ const Script = () => {
     setSeats(selectedSeat);
   };
 
+  useEffect(() => {
+    const arr = getDate();
+    setDate(arr);
+  }, []);
+
   const onClickBtn = () => {
     const activeSeats = seats.filter((seat) => seat.busy === true);
     const seatsIndex = [...activeSeats].map((seat) => [...seats].indexOf(seat));
     localStorage.setItem('selectedSeats', JSON.stringify(seatsIndex));
-    alert(`Вы приобрели ${activeSeats.length} билета`);
+    alert(`Вы забронировали ${activeSeats.length} билета`);
   };
 
   // function seatsFromLS() {
@@ -59,6 +99,7 @@ const Script = () => {
   };
   return (
     <div className='script-wrapper'>
+      <Select defaultValue={selectedDateOption} onChange={setSelectedDateOption} options={date} />
       <Select defaultValue={selectedOption} onChange={setSelectedOption} options={options} />
       {selectedOption && (
         <>
@@ -74,7 +115,7 @@ const Script = () => {
             onClick={() => {
               onClickBtn();
             }}>
-            Оплатить
+            Забронировать
           </button>
         </>
       )}
