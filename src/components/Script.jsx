@@ -26,7 +26,7 @@ const Script = () => {
   const [date, setDate] = useState([]);
 
   //Делаем массив дат
-  function getDate() {
+  function getDates() {
     const dayBefore = new Date();
     const today = new Date();
     let pastDays = [];
@@ -39,7 +39,9 @@ const Script = () => {
     }
 
     for (let i = 0; i <= 3; i++) {
-      today.setDate(today.getDate() + 1);
+      if (i !== 0) {
+        today.setDate(today.getDate() + 1);
+      }
       const dateFuture = displayDate(today);
       nextDays.push(dateFuture);
     }
@@ -66,7 +68,7 @@ const Script = () => {
   };
 
   useEffect(() => {
-    const arr = getDate();
+    const arr = getDates();
     setDate(arr);
   }, []);
 
