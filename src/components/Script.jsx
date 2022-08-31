@@ -72,29 +72,28 @@ const Script = () => {
     setDate(arr);
   }, []);
 
+  // пробуем получить данные из LS
+  function onClickGetData() {
+    const dataStorage = JSON.parse(localStorage.getItem('selectedSeats'));
+    if (dataStorage) {
+      const { seatsIndx } = dataStorage;
+      setSelectedDateOption(dataStorage.data);
+      setSelectedOption(dataStorage.time); // Данные ставятся в стейты, но не отображаются
+    }
+  }
+
   const onClickBtn = () => {
     const activeSeats = seats.filter((seat) => seat.busy === true);
     const seatsIndex = [...activeSeats].map((seat) => [...seats].indexOf(seat));
-    localStorage.setItem('selectedSeats', JSON.stringify(seatsIndex));
+    const saveArr = {
+      data: selectedDateOption,
+      time: selectedOption,
+      seatsIndx: seatsIndex,
+    };
+
+    localStorage.setItem('selectedSeats', JSON.stringify(saveArr));
     alert(`Вы забронировали ${activeSeats.length} билета`);
   };
-
-  // function seatsFromLS() {
-  //   const selectedSeatsIndx = JSON.parse(localStorage.getItem('selectedSeats'));
-  //   console.log('selectedSeatsIndx', selectedSeatsIndx);
-  //   if (selectedSeatsIndx !== null && selectedSeatsIndx.length > 0) {
-  //     let arr = [];
-  //     arr = seats.forEach((seat, index) => {
-  //       console.log('seat-indx', index);
-  //       return selectedSeatsIndx.indexOf(index) > -1 ? { ...seat, busy: true } : { ...seat };
-  //       setSeats(arr);
-  //     });
-  //   }
-  // }
-  // console.log(seats);
-  // React.useEffect(() => {
-  //   seatsFromLS();
-  // }, []);
 
   const className = (seat) => {
     return 'seat' + (seat.busy ? '-seat-busy' : '');
@@ -103,6 +102,9 @@ const Script = () => {
     <div className='script-wrapper'>
       <Select defaultValue={selectedDateOption} onChange={setSelectedDateOption} options={date} />
       <Select defaultValue={selectedOption} onChange={setSelectedOption} options={options} />
+      <button style={{ marginTop: 10 }} onClick={() => onClickGetData()}>
+        Получить данные
+      </button>
       {selectedOption && (
         <>
           <div className='places-wrapper'>
