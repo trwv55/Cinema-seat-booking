@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Select from 'react-select';
 
 const options = [
@@ -20,10 +20,27 @@ const listSeats = [
 ];
 
 const Script = () => {
-  const [selectedOption, setSelectedOption] = useState(null);
-  const [selectedDateOption, setSelectedDateOption] = useState(null);
   const [seats, setSeats] = useState(listSeats);
   const [date, setDate] = useState([]);
+  const isMounted = useRef(false);
+
+  // Вытаскиваем дату из LS
+  function onClickGetData() {
+    const dataStorage = JSON.parse(localStorage.getItem('selectedSeats'));
+    if (dataStorage !== null) {
+      const { seatsIndx } = dataStorage;
+      const initialDate = dataStorage.data;
+      const initialTime = dataStorage.time;
+      return { initialDate: initialDate, initialTime: initialTime, seatsIndx: seatsIndx };
+    }
+  }
+
+  const int = isMounted.current && onClickGetData();
+  const seatsIndx = int?.seatsIndx;
+  isMounted.current && getSeatsFull(seatsIndx);
+
+  const [selectedOption, setSelectedOption] = useState(int?.initialTime || null);
+  const [selectedDateOption, setSelectedDateOption] = useState(int?.initialDate || null);
 
   //Делаем массив дат
   function getDates() {
@@ -72,14 +89,15 @@ const Script = () => {
     setDate(arr);
   }, []);
 
-  // пробуем получить данные из LS
-  function onClickGetData() {
-    const dataStorage = JSON.parse(localStorage.getItem('selectedSeats'));
-    if (dataStorage) {
-      const { seatsIndx } = dataStorage;
-      setSelectedDateOption(dataStorage.data);
-      setSelectedOption(dataStorage.time); // Данные ставятся в стейты, но не отображаются
-    }
+  //Получаем занятые места из LS
+  function getSeatsFull(indexMas) {
+    indexMas.map((indx) => {
+      console.log(indx);
+      const fullSeat = seats.map((seat) => {
+        return seat.id === indx ? { ...seat, busy: true } : { ...seat };
+      });
+      setSeats(fullSeat);
+    });
   }
 
   const onClickBtn = () => {
@@ -102,7 +120,7 @@ const Script = () => {
     <div className='script-wrapper'>
       <Select defaultValue={selectedDateOption} onChange={setSelectedDateOption} options={date} />
       <Select defaultValue={selectedOption} onChange={setSelectedOption} options={options} />
-      <button style={{ marginTop: 10 }} onClick={() => onClickGetData()}>
+      <button style={{ marginTop: 10 }} onClick={onClickGetData}>
         Получить данные
       </button>
       {selectedOption && (
